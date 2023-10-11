@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html>
+<head>
+ 	<link rel="stylesheet" type="text/css" href="style.css">
+
+<style>/* Global Styles */<br />
+        body {<br />
+            font-family: Arial, sans-serif;<br />
+            margin: 0;<br />
+            padding: 0;<br />
+            background-image: url('https://images.unsplash.com/photo-1447433589675-4aaa569f3e05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1780&q=80');<br />
+            background-size: cover;<br />
+            background-repeat: no-repeat;<br />
+            background-attachment: fixed;<br />
+            color: #fff;<br />
+        }
+<p>        #welcomeScreen, #quiz {<br />
+            max-width: 600px;<br />
+            margin: 0 auto;<br />
+            padding: 20px;<br />
+            background: rgba(0, 0, 0, 0.7);<br />
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); /* Glowing effect */<br />
+            border-radius: 5px;<br />
+            text-align: center;<br />
+        }</p>
+<p>        #quiz {<br />
+            margin-top: 20px;<br />
+        }</p>
+<p>        h1 {<br />
+            font-size: 24px;<br />
+            color: #00aaff; /* Neon blue */<br />
+        }</p>
+<p>        button {<br />
+            background-color: #ff33cc; /* Neon pink */<br />
+            color: #fff;<br />
+            border: none;<br />
+            padding: 10px 20px;<br />
+            margin-top: 20px;<br />
+            cursor: pointer;<br />
+            border-radius: 5px;<br />
+            display: block;<br />
+            margin-left: auto;<br />
+            margin-right: auto;<br />
+            transition: background-color 0.2s ease;<br />
+        }</p>
+<p>        button:hover {<br />
+            background-color: #ff0099;<br />
+        }</p>
+<p>        .hidden {<br />
+            display: none;<br />
+        }</p>
+<p>        .choice input[type="checkbox"] {<br />
+            display: none;<br />
+        }</p>
+<p>        .choice label {<br />
+            position: relative;<br />
+            cursor: pointer;<br />
+            animation: rainbowGlow 2s linear infinite;<br />
+        }</p>
+<p>        @keyframes rainbowGlow {<br />
+            0% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.7); }<br />
+            14% { box-shadow: 0 0 10px rgba(255, 165, 0, 0.7); }<br />
+            28% { box-shadow: 0 0 10px rgba(255, 255, 0, 0.7); }<br />
+            42% { box-shadow: 0 0 10px rgba(0, 128, 0, 0.7); }<br />
+            57% { box-shadow: 0 0 10px rgba(0, 0, 255, 0.7); }<br />
+            71% { box-shadow: 0 0 10px rgba(75, 0, 130, 0.7); }<br />
+            85% { box-shadow: 0 0 10px rgba(148, 0, 211, 0.7); }<br />
+            100% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.7); }<br />
+        }</p>
+<p>        .choice label:before {<br />
+            content: '\2610';<br />
+            font-size: 20px;<br />
+            margin-right: 10px;<br />
+        }</p>
+<p>        .choice input[type="checkbox"]:checked + label:before {<br />
+            content: '\2611';<br />
+            color: #fff;<br />
+        }</p>
+<p>        #question {<br />
+            text-align: center;<br />
+        } </p>
+<p>        #choices {<br />
+            text-align: center;<br />
+        }</p>
+<p>        #proceedButton {<br />
+            display: block;<br />
+            margin: 20px auto;<br />
+        }</p>
+<p>        #restartButton {<br />
+            display: block;<br />
+            margin: 20px auto;<br />
+        }</p>
+<p>        #progressBar {<br />
+            width: 100%;<br />
+            background: linear-gradient(90deg, #0066ff, #ff33cc);<br />
+            height: 20px;<br />
+            margin-top: 20px;<br />
+            border-radius: 5px;<br />
+            overflow: hidden;<br />
+        }</p>
+<p>        #progress {<br />
+            width: 0;<br />
+            height: 100%;<br />
+            background-color: #ff33cc;<br />
+            transition: width 0.5s;<br />
+        }<br />
+</style></head>
+<body>
+<div id="welcomeScreen">
+<h1>Welcome to LWS Space-Innovation</h1>
+<button id="proceedButton">Proceed To Quiz</button></div>
+<div id="quiz" class="hidden">
+<div id="question"></div>
+<div id="choices"></div>
+<div id="result"></div>
+<div id="score"></div>
+<div id="progressBar">
+<div id="progress"></div>
+</div>
+<button id="nextButton" class="hidden">Next</button>
+<button id="restartButton" class="hidden">Restart Quiz</button></div>
+<!--<script src="script.js"></script>*/-->
+<script>
+    const welcomeScreen = document.getElementById('welcomeScreen');<br />
+    const proceedButton = document.getElementById('proceedButton');<br />
+    const quiz = document.getElementById('quiz');<br />
+    const questionElement = document.getElementById('question');<br />
+    const choicesElement = document.getElementById('choices');<br />
+    const resultElement = document.getElementById('result');<br />
+    const scoreElement = document.getElementById('score');<br />
+    const restartButton = document.getElementById('restartButton');<br />
+    const nextButton = document.getElementById('nextButton');<br />
+    const progressBar = document.getElementById('progressBar');<br />
+    const progress = document.getElementById('progress');</p>
+    <p>let currentQuestionIndex = 0;<br />
+    let score = 0;<br />
+    const questions = [<br />
+        {<br />
+            question: "What are the primary objectives of the Artemis II mission?",<br />
+            choices: [<br />
+                "a) To land astronauts on the Moon",<br />
+                "b) To test the Orion spacecraft's systems in deep space",<br />
+                "c) To explore Mars",<br />
+                "d) To study asteroids"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "How will Artemis II contribute to NASA's long-term goal of sending astronauts to Mars?",<br />
+            choices: [<br />
+                "a) By landing astronauts on Mars",<br />
+                "b) By testing deep space systems and operations",<br />
+                "c) By conducting lunar landings",<br />
+                "d) By studying the Earth's atmosphere"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the planned launch vehicle for the Artemis II mission?",<br />
+            choices: [<br />
+                "a) Falcon 9",<br />
+                "b) Space Launch System (SLS)",<br />
+                "c) Delta IV",<br />
+                "d) Ariane 5"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "How many astronauts are expected to be on board the Artemis II mission?",<br />
+            choices: [<br />
+                "a) One",<br />
+                "b) Two",<br />
+                "c) Four",<br />
+                "d) Six"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What is the expected duration of the Artemis II mission, including time in lunar orbit?",<br />
+            choices: [<br />
+                "a) A few hours",<br />
+                "b) Several days",<br />
+                "c) Several weeks",<br />
+                "d) Several months"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What will Artemis II primarily test during its mission?",<br />
+            choices: [<br />
+                "a) Agricultural systems",<br />
+                "b) Deep space travel technology",<br />
+                "c) Oceanography instruments",<br />
+                "d) Communication satellites"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the key purpose of Artemis II's lunar orbit trajectory?",<br />
+            choices: [<br />
+                "a) To conduct a lunar landing",<br />
+                "b) To test Mars rover technology",<br />
+                "c) To perform a lunar flyby and gather data",<br />
+                "d) To mine lunar resources"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What safety measure is in place for emergencies during Artemis II?",<br />
+            choices: [<br />
+                "a) Teleportation technology",<br />
+                "b) Abort systems to return the crew to Earth",<br />
+                "c) Giant trampolines on the Moon",<br />
+                "d) Inflatable lunar shelters"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "Does Artemis II involve any international collaboration?",<br />
+            choices: [<br />
+                "a) No, it's a solely NASA mission",<br />
+                "b) Yes, it includes collaboration with multiple countries",<br />
+                "c) Only with Russia",<br />
+                "d) Collaboration details are classified"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "How will data and findings from Artemis II be used?",<br />
+            choices: [<br />
+                "a) To improve weather forecasting",<br />
+                "b) To refine and prepare for future Artemis missions, including lunar landings",<br />
+                "c) To develop new video games",<br />
+                "d) To search for extraterrestrial life"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the main goal of Artemis II's lunar flyby?",<br />
+            choices: [<br />
+                "a) To land on the Moon and conduct experiments",<br />
+                "b) To test communication systems",<br />
+                "c) To collect lunar surface samples",<br />
+                "d) To gain experience in lunar operations"<br />
+            ],<br />
+            correctAnswer: 3<br />
+        },<br />
+        {<br />
+            question: "Which space agency is responsible for the Artemis program?",<br />
+            choices: [<br />
+                "a) ESA (European Space Agency)",<br />
+                "b) CNSA (China National Space Administration)",<br />
+                "c) NASA (National Aeronautics and Space Administration)",<br />
+                "d) ISRO (Indian Space Research Organisation)"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What is the primary spacecraft used for the Artemis II mission?",<br />
+            choices: [<br />
+                "a) Dragon",<br />
+                "b) Soyuz",<br />
+                "c) Orion",<br />
+                "d) Starship"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "In what year was the Artemis program officially announced by NASA?",<br />
+            choices: [<br />
+                "a) 2015",<br />
+                "b) 2017",<br />
+                "c) 2019",<br />
+                "d) 2021"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "Which component of the Space Launch System (SLS) is responsible for carrying the crewed Orion spacecraft?",<br />
+            choices: [<br />
+                "a) Core Stage",<br />
+                "b) Solid Rocket Boosters",<br />
+                "c) Launch Abort System",<br />
+                "d) Upper Stage"<br />
+            ],<br />
+            correctAnswer: 0<br />
+        },<br />
+        {<br />
+            question: "What is the name of the planned lunar gateway that Artemis missions will use as a staging point for lunar exploration?",<br />
+            choices: [<br />
+                "a) Lunar Station Alpha",<br />
+                "b) Gateway Station",<br />
+                "c) Lunar Orbital Platform-Gateway (LOP-G)",<br />
+                "d) Lunar Habitat One"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "Which region of the Moon is the primary target for Artemis lunar landings?",<br />
+            choices: [<br />
+                "a) North Pole",<br />
+                "b) South Pole",<br />
+                "c) Equatorial regions",<br />
+                "d) Far side of the Moon"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What type of spacecraft will be used for the lunar landings in the Artemis program?",<br />
+            choices: [<br />
+                "a) Space Shuttle",<br />
+                "b) Orion",<br />
+                "c) Lunar Module",<br />
+                "d) Mars Rover"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What is the primary scientific focus of Artemis missions on the lunar surface?",<br />
+            choices: [<br />
+                "a) Studying Martian geology",<br />
+                "b) Conducting experiments in lunar caves",<br />
+                "c) Investigating water ice and lunar resources",<br />
+                "d) Collecting meteorites"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What is the expected duration of Artemis III, the mission following Artemis II, which aims to land astronauts on the Moon?",<br />
+            choices: [<br />
+                "a) A few hours",<br />
+                "b) Several days",<br />
+                "c) Several weeks",<br />
+                "d) Several months"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the Artemis Accords, which has been associated with the Artemis program?",<br />
+            choices: [<br />
+                "a) A set of principles for international cooperation in space exploration",<br />
+                "b) A lunar currency for trade",<br />
+                "c) A series of books about lunar exploration",<br />
+                "d) An international space treaty"<br />
+            ],<br />
+            correctAnswer: 0<br />
+        },<br />
+        {<br />
+            question: "Which of the following is NOT one of the Artemis program's key objectives?",<br />
+            choices: [<br />
+                "a) To establish a sustainable human presence on the Moon",<br />
+                "b) To develop new propulsion technologies",<br />
+                "c) To prepare for human missions to Mars",<br />
+                "d) To conduct scientific research on the Moon"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What will Artemis II's astronauts primarily focus on while in lunar orbit?",<br />
+            choices: [<br />
+                "a) Conducting spacewalks on the lunar surface",<br />
+                "b) Studying the lunar soil from orbit",<br />
+                "c) Testing lunar habitats",<br />
+                "d) Observing Earth from the Moon's orbit"<br />
+            ],<br />
+            correctAnswer: 3<br />
+        },<br />
+        {<br />
+            question: "Which of the following is NOT a goal of Artemis II's lunar flyby?",<br />
+            choices: [<br />
+                "a) Testing the spacecraft's life support systems",<br />
+                "b) Observing the lunar surface",<br />
+                "c) Collecting lunar rocks",<br />
+                "d) Conducting experiments in deep space"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "In addition to the Moon, what other celestial body will Artemis II's astronauts have the opportunity to observe from deep space?",<br />
+            choices: [<br />
+                "a) Mars",<br />
+                "b) Venus",<br />
+                "c) Jupiter",<br />
+                "d) Earth"<br />
+            ],<br />
+            correctAnswer: 3<br />
+        },<br />
+        {<br />
+            question: "How will data from Artemis II contribute to improving future lunar landings?",<br />
+            choices: [<br />
+                "a) By designing new spacesuits",<br />
+                "b) By helping to select landing sites",<br />
+                "c) By improving rocket propulsion technology",<br />
+                "d) By developing new lunar rovers"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What role does the Launch Abort System (LAS) play in Artemis II's safety measures?",<br />
+            choices: [<br />
+                "a) It provides an emergency exit for astronauts on the lunar surface.",<br />
+                "b) It is a communication system.",<br />
+                "c) It can return the crew to Earth in case of an emergency during launch.",<br />
+                "d) It is used for spacewalks."<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "Which international space agency is actively collaborating with NASA on the Artemis program?",<br />
+            choices: [<br />
+                "a) ESA (European Space Agency)",<br />
+                "b) CNSA (China National Space Administration)",<br />
+                "c) Roscosmos (Russian Federal Space Agency)",<br />
+                "d) ISRO (Indian Space Research Organisation)"<br />
+            ],<br />
+            correctAnswer: 0<br />
+        },<br />
+        {<br />
+            question: "What is the Artemis program's approach to sustainable lunar exploration?",<br />
+            choices: [<br />
+                "a) It involves one-time, short-term lunar missions.",<br />
+                "b) It aims to establish a long-term human presence on the Moon.",<br />
+                "c) It focuses exclusively on scientific research.",<br />
+                "d) It aims to send robots to the Moon."<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the expected number of Artemis missions that will occur before the first human landing on Mars?",<br />
+            choices: [<br />
+                "a) 1",<br />
+                "b) 2",<br />
+                "c) 3",<br />
+                "d) 4"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+      {<br />
+            question: "What are the primary objectives of the Artemis II mission?",<br />
+            choices: [<br />
+                "a) To land astronauts on the Moon",<br />
+                "b) To test the Orion spacecraft's systems in deep space",<br />
+                "c) To explore Mars",<br />
+                "d) To study asteroids"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "How will Artemis II contribute to NASA's long-term goal of sending astronauts to Mars?",<br />
+            choices: [<br />
+                "a) By landing astronauts on Mars",<br />
+                "b) By testing deep space systems and operations",<br />
+                "c) By conducting lunar landings",<br />
+                "d) By studying the Earth's atmosphere"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the planned launch vehicle for the Artemis II mission?",<br />
+            choices: [<br />
+                "a) Falcon 9",<br />
+                "b) Space Launch System (SLS)",<br />
+                "c) Delta IV",<br />
+                "d) Ariane 5"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "How many astronauts are expected to be on board the Artemis II mission?",<br />
+            choices: [<br />
+                "a) One",<br />
+                "b) Two",<br />
+                "c) Four",<br />
+                "d) Six"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What is the expected duration of the Artemis II mission, including time in lunar orbit?",<br />
+            choices: [<br />
+                "a) A few hours",<br />
+                "b) Several days",<br />
+                "c) Several weeks",<br />
+                "d) Several months"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What will Artemis II primarily test during its mission?",<br />
+            choices: [<br />
+                "a) Agricultural systems",<br />
+                "b) Deep space travel technology",<br />
+                "c) Oceanography instruments",<br />
+                "d) Communication satellites"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the key purpose of Artemis II's lunar orbit trajectory?",<br />
+            choices: [<br />
+                "a) To conduct a lunar landing",<br />
+                "b) To test Mars rover technology",<br />
+                "c) To perform a lunar flyby and gather data",<br />
+                "d) To mine lunar resources"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What safety measure is in place for emergencies during Artemis II?",<br />
+            choices: [<br />
+                "a) Teleportation technology",<br />
+                "b) Abort systems to return the crew to Earth",<br />
+                "c) Giant trampolines on the Moon",<br />
+                "d) Inflatable lunar shelters"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "Does Artemis II involve any international collaboration?",<br />
+            choices: [<br />
+                "a) No, it's a solely NASA mission",<br />
+                "b) Yes, it includes collaboration with multiple countries",<br />
+                "c) Only with Russia",<br />
+                "d) Collaboration details are classified"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "How will data and findings from Artemis II be used?",<br />
+            choices: [<br />
+                "a) To improve weather forecasting",<br />
+                "b) To refine and prepare for future Artemis missions, including lunar landings",<br />
+                "c) To develop new video games",<br />
+                "d) To search for extraterrestrial life"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the main goal of Artemis II's lunar flyby?",<br />
+            choices: [<br />
+                "a) To land on the Moon and conduct experiments",<br />
+                "b) To test communication systems",<br />
+                "c) To collect lunar surface samples",<br />
+                "d) To gain experience in lunar operations"<br />
+            ],<br />
+            correctAnswer: 3<br />
+        },<br />
+        {<br />
+            question: "Which space agency is responsible for the Artemis program?",<br />
+            choices: [<br />
+                "a) ESA (European Space Agency)",<br />
+                "b) CNSA (China National Space Administration)",<br />
+                "c) NASA (National Aeronautics and Space Administration)",<br />
+                "d) ISRO (Indian Space Research Organisation)"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What is the primary spacecraft used for the Artemis II mission?",<br />
+            choices: [<br />
+                "a) Dragon",<br />
+                "b) Soyuz",<br />
+                "c) Orion",<br />
+                "d) Starship"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "In what year was the Artemis program officially announced by NASA?",<br />
+            choices: [<br />
+                "a) 2015",<br />
+                "b) 2017",<br />
+                "c) 2019",<br />
+                "d) 2021"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What is the primary focus of the Artemis program?",<br />
+            choices: [<br />
+                "a) Exploring Mars",<br />
+                "b) Establishing a permanent lunar base",<br />
+                "c) Studying Earth's environment",<br />
+                "d) Discovering extraterrestrial life"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What role does the Artemis II mission play in the Artemis program?",<br />
+            choices: [<br />
+                "a) A robotic mission to collect lunar samples",<br />
+                "b) A crewed mission to test lunar habitats",<br />
+                "c) A test flight for the Space Launch System (SLS)",<br />
+                "d) A mission to study the effects of microgravity"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "How can the knowledge gained from the Artemis program be applied to space tourism?",<br />
+            choices: [<br />
+                "a) By developing lunar resorts for tourists",<br />
+                "b) By studying lunar wildlife for ecotourism",<br />
+                "c) By improving rocket technology for safer space travel",<br />
+                "d) By creating space-themed amusement parks on Earth"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What is one potential benefit of studying the Moon's water ice resources for Earth's communities?",<br />
+            choices: [<br />
+                "a) Generating electricity from lunar ice",<br />
+                "b) Reducing Earth's dependence on fossil fuels",<br />
+                "c) Creating lunar agriculture for Earth's food supply",<br />
+                "d) Establishing lunar mining operations for Earth's minerals"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the expected job creation impact of the Artemis program by 2025?",<br />
+            choices: [<br />
+                "a) Over 1 million jobs",<br />
+                "b) Over 10,000 jobs",<br />
+                "c) Over 100,000 jobs",<br />
+                "d) No significant job creation"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "How does the Artemis 2 mission contribute to technological innovation?",<br />
+            choices: [<br />
+                "a) By developing new mobile phone technologies",<br />
+                "b) By testing advanced space travel technologies",<br />
+                "c) By creating virtual reality gaming experiences",<br />
+                "d) By improving social media platforms"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What does the term 'STEM' stand for?",<br />
+            choices: [<br />
+                "a) Science, Technology, Exploration, Mathematics",<br />
+                "b) Science, Technology, Engineering, Mathematics",<br />
+                "c) Space Travel, Earth Studies, Mathematics",<br />
+                "d) Scientific Testing, Environmental Management"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the primary focus of the SplitShire resource?",<br />
+            choices: [<br />
+                "a) Space exploration",<br />
+                "b) Historical photos",<br />
+                "c) High-quality images for personal and commercial use",<br />
+                "d) Vintage fashion photography"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "How might the Artemis program benefit communities in need of clean drinking water?",<br />
+            choices: [<br />
+                "a) By transporting water from the Moon to Earth",<br />
+                "b) By developing advanced desalination techniques",<br />
+                "c) By studying Earth's oceanography",<br />
+                "d) By using lunar water purification technologies"<br />
+            ],<br />
+            correctAnswer: 3<br />
+        },<br />
+        {<br />
+            question: "What role does the Hubble Space Telescope play in space exploration?",<br />
+            choices: [<br />
+                "a) Studying the Moon's geology",<br />
+                "b) Observing distant galaxies and celestial objects",<br />
+                "c) Monitoring Earth's climate",<br />
+                "d) Testing advanced space propulsion systems"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "Which mission is considered the first crewed mission of the Artemis program?",<br />
+            choices: [<br />
+                "a) Artemis 1",<br />
+                "b) Artemis 3",<br />
+                "c) Artemis 4",<br />
+                "d) Artemis 5"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "How might knowledge gained from the Artemis program be applied to improve agriculture on Earth?",<br />
+            choices: [<br />
+                "a) By developing space-based agriculture on the Moon",<br />
+                "b) By creating new types of crops for lunar colonies",<br />
+                "c) By improving crop yields and reducing water usage",<br />
+                "d) By studying the effects of microgravity on plants"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What is the primary source of economic activity generated by the Artemis program?",<br />
+            choices: [<br />
+                "a) Selling lunar land to private companies",<br />
+                "b) Developing space tourism for wealthy travelers",<br />
+                "c) Research and development in the space industry",<br />
+                "d) Manufacturing lunar habitats for human settlement"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "How might the Artemis program impact the development of medical treatments?",<br />
+            choices: [<br />
+                "a) By creating new diseases that require treatment",<br />
+                "b) By studying lunar wildlife for potential cures",<br />
+                "c) By researching the effects of microgravity on the human body",<br />
+                "d) By focusing solely on space medicine for astronauts"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "Which organization is responsible for curating Reshot's images?",<br />
+            choices: [<br />
+                "a) NASA",<br />
+                "b) A team of independent photographers",<br />
+                "c) The United Nations",<br />
+                "d) An international space agency"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "What is the primary focus of the Burst by Shopify resource?",<br />
+            choices: [<br />
+                "a) Offering free high-resolution space images",<br />
+                "b) Providing resources for e-commerce entrepreneurs",<br />
+                "c) Studying lunar geology",<br />
+                "d) Developing lunar mining technologies"<br />
+            ],<br />
+            correctAnswer: 1<br />
+        },<br />
+        {<br />
+            question: "How does studying space exploration contribute to technological advancements on Earth?",<br />
+            choices: [<br />
+                "a) By decreasing investment in technology research",<br />
+                "b) By inspiring fewer people to pursue STEM careers",<br />
+                "c) By fostering innovation and developing new technologies",<br />
+                "d) By diverting resources away from technological development"<br />
+            ],<br />
+            correctAnswer: 2<br />
+        },<br />
+        {<br />
+            question: "What might be a potential application of rare minerals extracted from the Moon?",<br />
+            choices: [<br />
+                "a) Building lunar amusement parks",<br />
+                "b) Developing new fashion accessories",<br />
+                "c) Enhancing Earth's jewelry industry",<br />
+                "d) Creating advanced electronics and materials"<br />
+            ],<br />
+            correctAnswer: 3<br />
+        },<br />
+        {<br />
+            question: "What impact could the Artemis program have on international space exploration efforts?",<br />
+            choices: [<br />
+                "a) It may encourage collaboration with other space agencies.",<br />
+                "b) It may lead to competition and isolation.",<br />
+                "c) It may focus exclusively on national space missions.",<br />
+                "d) It may discourage all international space efforts."<br />
+            ],<br />
+            correctAnswer: 0<br />
+        },<br />
+        {<br />
+            question: "What is the primary benefit of the knowledge gained from studying space environments and technologies for Earth?",<br />
+            choices: [<br />
+                "a) It leads to immediate solutions to Earth's environmental problems.",<br />
+                "b) It creates space-themed amusement parks.",<br />
+                "c) It fosters international collaboration on Earth's issues.",<br />
+                "d) It drives technological innovation and sustainable practices."<br />
+            ],<br />
+            correctAnswer: 3<br />
+        },<br />
+    {<br />
+        question: "What is the primary objective of the Artemis 2 mission?",<br />
+        choices: [<br />
+            "a) Scientific exploration",<br />
+            "b) Economic growth",<br />
+            "c) Inspiration",<br />
+            "d) Environmental sustainability"<br />
+        ],<br />
+        correctAnswer: 0<br />
+    },<br />
+    {<br />
+        question: "What is the Artemis program's goal in terms of lunar exploration?",<br />
+        choices: [<br />
+            "a) Establishing a permanent human settlement on the Moon",<br />
+            "b) Extracting rare minerals from the Moon",<br />
+            "c) Studying the Moon's water ice resources",<br />
+            "d) Developing new technologies for Earth's ecosystems"<br />
+        ],<br />
+        correctAnswer: 0<br />
+    },<br />
+    {<br />
+        question: "How might the Artemis 2 mission impact STEM education?",<br />
+        choices: [<br />
+            "a) It could decrease interest in STEM fields.",<br />
+            "b) It could have no impact on STEM education.",<br />
+            "c) It is likely to inspire interest in STEM fields.",<br />
+            "d) It may only impact space-related STEM fields."<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "What is one potential application of the water purification technologies developed for the Artemis mission?",<br />
+        choices: [<br />
+            "a) Cleaning space debris",<br />
+            "b) Providing clean drinking water to communities in need",<br />
+            "c) Fueling rockets for space travel",<br />
+            "d) Growing food on the Moon"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "What is the estimated economic impact of the Artemis program?",<br />
+        choices: [<br />
+            "a) $100 million",<br />
+            "b) $1 trillion",<br />
+            "c) $10 billion",<br />
+            "d) $1 million"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "Which Apollo mission was the last crewed mission to the Moon before Artemis 2?",<br />
+        choices: [<br />
+            "a) Apollo 11",<br />
+            "b) Apollo 13",<br />
+            "c) Apollo 17",<br />
+            "d) Apollo 6"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "What is the significance of studying the effects of microgravity on the human body?",<br />
+        choices: [<br />
+            "a) It helps in developing better space food.",<br />
+            "b) It leads to a better understanding of Earth's gravity.",<br />
+            "c) It can lead to new medical treatments for certain conditions.",<br />
+            "d) It helps astronauts adapt to lunar gravity."<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "How does the Artemis program impact the aerospace industry?",<br />
+        choices: [<br />
+            "a) It reduces job opportunities in the industry.",<br />
+            "b) It has no effect on the industry.",<br />
+            "c) It creates jobs and opportunities in the industry.",<br />
+            "d) It focuses exclusively on space tourism."<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "Which space agency is leading the Artemis program?",<br />
+        choices: [<br />
+            "a) European Space Agency (ESA)",<br />
+            "b) Russian Space Agency (Roscosmos)",<br />
+            "c) Chinese National Space Administration (CNSA)",<br />
+            "d) National Aeronautics and Space Administration (NASA)"<br />
+        ],<br />
+        correctAnswer: 3<br />
+    },<br />
+    {<br />
+        question: "What is the primary focus of the New Old Stock resource?",<br />
+        choices: [<br />
+            "a) Providing space-related images",<br />
+            "b) Offering vintage and historical photos",<br />
+            "c) Showcasing the Artemis program",<br />
+            "d) Sharing current space exploration news"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "What potential resource on the Moon is of interest to scientists?",<br />
+        choices: [<br />
+            "a) Rare minerals",<br />
+            "b) Water ice",<br />
+            "c) Helium-3",<br />
+            "d) Gold"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "What type of economic opportunities can successful lunar missions create?",<br />
+        choices: [<br />
+            "a) Opportunities in agriculture",<br />
+            "b) Opportunities in fashion industry",<br />
+            "c) Opportunities in tourism",<br />
+            "d) Opportunities in the space industry"<br />
+        ],<br />
+        correctAnswer: 3<br />
+    },<br />
+    {<br />
+        question: "How can lessons learned from space missions contribute to sustainability on Earth?",<br />
+        choices: [<br />
+            "a) By improving space travel efficiency",<br />
+            "b) By reducing the need for space exploration",<br />
+            "c) By promoting waste reduction and recycling",<br />
+            "d) By focusing on space tourism"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "What impact does the Artemis 2 mission aim to have on the water supply for communities?",<br />
+        choices: [<br />
+            "a) It aims to extract water from the Moon.",<br />
+            "b) It focuses on reducing water usage on Earth.",<br />
+            "c) It aims to create artificial lakes on the Moon.",<br />
+            "d) It aims to transport water from Earth to the Moon."<br />
+        ],<br />
+        correctAnswer: 0<br />
+    },<br />
+    {<br />
+        question: "How might the Artemis program stimulate economic growth?",<br />
+        choices: [<br />
+            "a) By reducing funding for space exploration",<br />
+            "b) By decreasing the number of jobs in the aerospace industry",<br />
+            "c) By generating economic activity and job creation",<br />
+            "d) By focusing solely on scientific research"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "What is one potential application of the knowledge gained from studying the Moon's water ice resources?",<br />
+        choices: [<br />
+            "a) Developing new space tourism destinations",<br />
+            "b) Fueling rockets for space travel",<br />
+            "c) Growing food in deep space",<br />
+            "d) Improving traffic management on Earth"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "How does the Artemis program impact international cooperation?",<br />
+        choices: [<br />
+            "a) It discourages collaboration with other space agencies.",<br />
+            "b) It solely focuses on national space exploration efforts.",<br />
+            "c) It fosters collaboration with multiple international space agencies.",<br />
+            "d) It competes with international space agencies."<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "What type of images does Gratisography offer?",<br />
+        choices: [<br />
+            "a) Space-related images",<br />
+            "b) Vintage and historical photos",<br />
+            "c) Quirky and creative images",<br />
+            "d) Scientific diagrams"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "How might the Artemis program impact environmental sustainability?",<br />
+        choices: [<br />
+            "a) By increasing space debris",<br />
+            "b) By focusing on resource extraction on Earth",<br />
+            "c) By promoting sustainability practices, such as efficient energy use",<br />
+            "d) By increasing waste generation"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "What could the knowledge gained from studying the effects of microgravity lead to?",<br />
+        choices: [<br />
+            "a) Improved food production on Earth",<br />
+            "b) Better understanding of the Moon's surface",<br />
+            "c) Enhanced astronaut training programs",<br />
+            "d) New medical treatments for certain conditions"<br />
+        ],<br />
+        correctAnswer: 3<br />
+    },<br />
+    {<br />
+        question: "What is the primary goal of the Artemis program?",<br />
+        choices: [<br />
+            "a) To explore Mars",<br />
+            "b) To establish a permanent lunar base",<br />
+            "c) To study Earth's environment",<br />
+            "d) To discover extraterrestrial life"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "What role does the Artemis 2 mission play in the Artemis program?",<br />
+        choices: [<br />
+            "a) It is a robotic mission to collect lunar samples.",<br />
+            "b) It is a crewed mission to test lunar habitats.",<br />
+            "c) It is a test flight for the Space Launch System (SLS).",<br />
+            "d) It is a mission to study the effects of microgravity."<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "How can the knowledge gained from the Artemis program be applied to space tourism?",<br />
+        choices: [<br />
+            "a) By developing lunar resorts for tourists",<br />
+            "b) By studying lunar wildlife for ecotourism",<br />
+            "c) By improving rocket technology for safer space travel",<br />
+            "d) By creating space-themed amusement parks on Earth"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "What is one potential benefit of studying the Moon's water ice resources for Earth's communities?",<br />
+        choices: [<br />
+            "a) Generating electricity from lunar ice",<br />
+            "b) Reducing Earth's dependence on fossil fuels",<br />
+            "c) Creating lunar agriculture for Earth's food supply",<br />
+            "d) Establishing lunar mining operations for Earth's minerals"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "What is the expected job creation impact of the Artemis program by 2025?",<br />
+        choices: [<br />
+            "a) Over 1 million jobs",<br />
+            "b) Over 10,000 jobs",<br />
+            "c) Over 100,000 jobs",<br />
+            "d) No significant job creation"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "How does the Artemis 2 mission contribute to technological innovation?",<br />
+        choices: [<br />
+            "a) By developing new mobile phone technologies",<br />
+            "b) By testing advanced space travel technologies",<br />
+            "c) By creating virtual reality gaming experiences",<br />
+            "d) By improving social media platforms"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "What does the term 'STEM' stand for?",<br />
+        choices: [<br />
+            "a) Science, Technology, Exploration, Mathematics",<br />
+            "b) Science, Technology, Engineering, Mathematics",<br />
+            "c) Space Travel, Earth Studies, Mathematics",<br />
+            "d) Scientific Testing, Environmental Management"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "What is the primary focus of the SplitShire resource?",<br />
+        choices: [<br />
+            "a) Space exploration",<br />
+            "b) Historical photos",<br />
+            "c) High-quality images for personal and commercial use",<br />
+            "d) Vintage fashion photography"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "How might the Artemis program benefit communities in need of clean drinking water?",<br />
+        choices: [<br />
+            "a) By transporting water from the Moon to Earth",<br />
+            "b) By developing advanced desalination techniques",<br />
+            "c) By studying Earth's oceanography",<br />
+            "d) By using lunar water purification technologies"<br />
+        ],<br />
+        correctAnswer: 3<br />
+    },<br />
+    {<br />
+        question: "What role does the Hubble Space Telescope play in space exploration?",<br />
+        choices: [<br />
+            "a) Studying the Moon's geology",<br />
+            "b) Observing distant galaxies and celestial objects",<br />
+            "c) Monitoring Earth's climate",<br />
+            "d) Testing advanced space propulsion systems"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "Which mission is considered the first crewed mission of the Artemis program?",<br />
+        choices: [<br />
+            "a) Artemis 1",<br />
+            "b) Artemis 3",<br />
+            "c) Artemis 4",<br />
+            "d) Artemis 5"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "How might knowledge gained from the Artemis program be applied to improve agriculture on Earth?",<br />
+        choices: [<br />
+            "a) By developing space-based agriculture on the Moon",<br />
+            "b) By creating new types of crops for lunar colonies",<br />
+            "c) By improving crop yields and reducing water usage",<br />
+            "d) By studying the effects of microgravity on plants"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "What is the primary source of economic activity generated by the Artemis program?",<br />
+        choices: [<br />
+            "a) Selling lunar land to private companies",<br />
+            "b) Developing space tourism for wealthy travelers",<br />
+            "c) Research and development in the space industry",<br />
+            "d) Manufacturing lunar habitats for human settlement"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "How might the Artemis program impact the development of medical treatments?",<br />
+        choices: [<br />
+            "a) By creating new diseases that require treatment",<br />
+            "b) By studying lunar wildlife for potential cures",<br />
+            "c) By researching the effects of microgravity on the human body",<br />
+            "d) By focusing solely on space medicine for astronauts"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "Which organization is responsible for curating Reshot's images?",<br />
+        choices: [<br />
+            "a) NASA",<br />
+            "b) A team of independent photographers",<br />
+            "c) The United Nations",<br />
+            "d) An international space agency"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "What is the primary focus of the Burst by Shopify resource?",<br />
+        choices: [<br />
+            "a) Offering free high-resolution space images",<br />
+            "b) Providing resources for e-commerce entrepreneurs",<br />
+            "c) Studying lunar geology",<br />
+            "d) Developing lunar mining technologies"<br />
+        ],<br />
+        correctAnswer: 1<br />
+    },<br />
+    {<br />
+        question: "How does studying space exploration contribute to technological advancements on Earth?",<br />
+        choices: [<br />
+            "a) By decreasing investment in technology research",<br />
+            "b) By inspiring fewer people to pursue STEM careers",<br />
+            "c) By fostering innovation and developing new technologies",<br />
+            "d) By diverting resources away from technological development"<br />
+        ],<br />
+        correctAnswer: 2<br />
+    },<br />
+    {<br />
+        question: "What might be a potential application of rare minerals extracted from the Moon?",<br />
+        choices: [<br />
+            "a) Building lunar amusement parks",<br />
+            "b) Developing new fashion accessories",<br />
+            "c) Enhancing Earth's jewelry industry",<br />
+            "d) Creating advanced electronics and materials"<br />
+        ],<br />
+        correctAnswer: 3<br />
+    },<br />
+    {<br />
+        question: "What impact could the Artemis program have on international space exploration efforts?",<br />
+        choices: [<br />
+            "a) It may encourage collaboration with other space agencies.",<br />
+            "b) It may lead to competition and isolation.",<br />
+            "c) It may focus exclusively on national space missions.",<br />
+            "d) It may discourage all international space efforts."<br />
+        ],<br />
+        correctAnswer: 0<br />
+    },<br />
+    {<br />
+        question: "What is the primary benefit of the knowledge gained from studying space environments and technologies for Earth?",<br />
+        choices: [<br />
+            "a) It leads to immediate solutions to Earth's environmental problems.",<br />
+            "b) It creates space-themed amusement parks.",<br />
+            "c) It fosters international collaboration on Earth's issues.",<br />
+            "d) It drives technological innovation and sustainable practices."<br />
+        ],<br />
+        correctAnswer: 3<br />
+    },<br />
+    ];<br />
+    function shuffleArray(array) {<br />
+        for (let i = array.length - 1; i > 0; i--) {<br />
+            const j = Math.floor(Math.random() * (i + 1));<br />
+            [array[i], array[j]] = [array[j], array[i]];<br />
+        }<br />
+    }</p>
+    <p>shuffleArray(questions);</p>
+    <p>function startQuiz() {<br />
+        currentQuestionIndex = 0;<br />
+        score = 0;<br />
+        nextButton.style.display = "none";<br />
+        restartButton.style.display = "none";<br />
+        progressBar.style.width = "0%"; // Reset the progress bar<br />
+        showQuestion(questions[currentQuestionIndex]);<br />
+    }</p>
+    <p>function showQuestion(question) {<br />
+        questionElement.textContent = question.question;<br />
+        choicesElement.innerHTML = "";</p>
+    <p>    for (let i = 0; i < question.choices.length; i++) {
+            const choice = document.createElement("button");
+            choice.textContent = question.choices[i];
+            choice.classList.add("choice");
+            choice.addEventListener("click", () => checkAnswer(i));<br />
+            choicesElement.appendChild(choice);<br />
+        <br />
+    </p>
+    <p>function checkAnswer(choiceIndex) {<br />
+        if (choiceIndex === questions[currentQuestionIndex].correctAnswer) {<br />
+            score++;<br />
+            scoreElement.textContent = `Current Score: ${score} out of ${questions.length}`;<br />
+            currentQuestionIndex++;</p>
+    <p>        if (currentQuestionIndex < questions.length) {
+                showQuestion(questions[currentQuestionIndex]);
+            } else {
+                endQuiz();
+            }
+
+            const percentComplete = (currentQuestionIndex / questions.length) * 100;
+            progressBar.style.width = `${percentComplete}%`; 
+        } else {
+            endQuizWrong();
+        }
+    }
+
+    function endQuiz() {
+        questionElement.textContent = "Quiz Complete!";
+        choicesElement.innerHTML = "";
+        scoreElement.textContent = `Your Score: ${score} out of ${questions.length}`;
+        resultElement.style.display = "block";
+        restartButton.style.display = "block";
+    }
+
+    function endQuizWrong() {
+        questionElement.textContent = "Sorry, You Got it Wrong!";
+        choicesElement.innerHTML = "";
+        scoreElement.textContent = `Your Score: ${score} out of ${questions.length}`;
+        resultElement.style.display = "block";
+        restartButton.style.display = "block";
+    }
+
+    nextButton.addEventListener("click", () => {<br />
+        showQuestion(questions[currentQuestionIndex]);<br />
+        nextButton.style.display = "none";<br />
+    });</p>
+    <p>restartButton.addEventListener("click", () => {<br />
+        startQuiz();<br />
+        resultElement.style.display = "none";<br />
+    });</p>
+    <p>startQuiz();</p>
+    <p>proceedButton.addEventListener('click', startGame);<br />
+    restartButton.addEventListener('click', startGame);</p>
+    <p>function startGame() {<br />
+        welcomeScreen.classList.add('hidden');<br />
+        quiz.classList.remove('hidden');<br />
+        score = 0;<br />
+        currentQuestionIndex = 0;<br />
+        scoreElement.textContent = '';<br />
+        showNextQuestion();<br />
+    }</p>
+    <p>function showNextQuestion() {<br />
+    <br />
+    </script>
+</body>
+
+</html>
